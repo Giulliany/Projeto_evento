@@ -3,18 +3,21 @@ from django.contrib.auth.models import User
 
 class Pessoa (models.Model):
     nome = models.CharField( max_length=128)
-    email = models.CharField(max_length=150)
+    email = models.EmailField(max_length=150)
 
     def __str__(self):
         return self.nome
-class Autor (Pessoa):
+
+class Autor (models.Model):
     curriculo = models.TextField(null=True, blank=True)
-    artigos = models.ManyToManyField(ArtigoCientifico, null=True, blank=True, on_delete=models.SET_NULL)
+    pessoa = models.ForeignKey(Pessoa, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    # artigos = models.ManyToManyField(ArtigoCientifico, null=True, blank=True, on_delete=models.SET_NULL)
     def __str__(self):
-        ac = ''
-        for i in self.artigos.all():
-            ac = ac + ',' + i.titulo + ','
-        return str (self.curriculo) + ac
+        return "{} ({})".format(self.pessoa, self.curriculo)
+        # ac = ''
+        # for i in self.artigos.all():
+        #     ac = ac + ',' + i.titulo + ','
+        # return str (self.curriculo) + ac
 
 class PessoaJuridica (Pessoa):
     cnpj = models.CharField(max_length=11, null=True, blank=True)
@@ -50,7 +53,7 @@ class ECientifico(Evento):
 
 class ArtigoCientifico(models.Model):
     titulo = models.CharField(max_length=150)
-    autores = models.ManyToManyField(Autor, null=True, blank=True, on_delete=models.SET_NULL)
+    autores = models.ManyToManyField(Autor)
     evento = models.ForeignKey(ECientifico, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
